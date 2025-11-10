@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  minimal-sd-api:
+    image: rocm/pytorch:rocm6.4.4_ubuntu24.04_py3.12_pytorch_release_2.7.1
+    container_name: minimal-sd-api
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    group_add:
+      - "44"    # video group
+      - "109"   # render group
+    ipc: host
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /home/zack/ai-workspace/Projects:/workspace/Projects
+      - /home/zack/ai-workspace/Models:/workspace/Models
+      - /home/zack/ai-workspace/DockerVolumes/minimal-sd:/workspace/data
+    working_dir: /workspace
+    environment:
+      - HIP_PLATFORM=amd
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - "PIP_ONLY_BINARY=:all:"
+      - PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:128
+      
+      # Phase 2: Memory Management Improvements
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+      - HSA_XNACK=0                        # Disable XNACK for performance
+      - GPU_MAX_HW_QUEUES=4                # Increase hardware queues
+      - HSA_QUEUE_SIZE=32768               # Larger queue size
+      
+      # Phase 1 Logging - DISABLED (debugging complete, root cause identified)
+      - AMD_LOG_LEVEL=0                    # Minimal logging (was 3 for debugging)
+      # - HIP_LAUNCH_BLOCKING=1            # DISABLED - only needed for debugging
+      # - MALLOC_CHECK_=3                  # DISABLED - only needed for debugging
+      
+      # Existing settings
+      - AMD_SERIALIZE_KERNEL=1
+      - HSA_FORCE_FINE_GRAIN_PCIE=1
+      - ROCBLAS_LAYER=0
+      - TORCH_USE_HIP_DSA=1
+      - HIP_DB=0x1
+      - HSA_ENABLE_SDMA=0
+      - GPU_MAX_ALLOC_PERCENT=80
+      - GPU_SINGLE_ALLOC_PERCENT=60
+      - HIP_VISIBLE_DEVICES=0
+      - CUDA_VISIBLE_DEVICES=0
+    ports:
+      - "8000:8000"
+    command: >
+      bash -c "
+        echo 'Installing minimal dependencies...' &&
+        pip install --no-cache-dir diffusers transformers accelerate safetensors pillow fastapi uvicorn &&
+        echo 'Starting minimal Stable Diffusion API...' &&
+        python3 /workspace/Projects/minimal_sd_api.py
+      "
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
