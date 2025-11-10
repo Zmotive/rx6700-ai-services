@@ -1,0 +1,80 @@
+Add Service Nanny orchestrator with GPU arbitration and service templates
+
+This commit implements a complete service orchestration system for managing
+AI/ML services with automatic GPU arbitration and health monitoring.
+
+Features:
+- Service Nanny: FastAPI orchestrator with REST API for service lifecycle management
+- Auto-discovery: Scans for service.yaml manifests, no manual registration needed
+- GPU Arbitration: Enforces one-GPU-service-at-a-time rule to prevent VRAM conflicts
+- Health Monitoring: Active polling of service /health endpoints with uptime tracking
+- Service Template: Copy-paste boilerplate for rapid service creation (<5 min setup)
+- Docker Integration: Uses docker-compose via mounted socket for container control
+
+New Components:
+- service-nanny/
+  - service_nanny.py: Main orchestrator (350 lines, full API implementation)
+  - docker-compose.yml: Service Nanny container config (port 8080)
+  - README.md: Complete API documentation with examples
+  - ARCHITECTURE.md: System design, data flows, future roadmap
+  - IMPLEMENTATION.md: Complete implementation summary
+  - QUICKREF.md: Visual quick reference guide
+  - start.sh: Quick start helper script
+  - test_api.sh: API testing script
+
+- _template/
+  - service.yaml: Full manifest schema with comments
+  - docker-compose.yml: Template with CPU/GPU examples
+  - app.py: FastAPI starter with required /health endpoint
+  - README.md: Service documentation template
+  - SETUP.md: Step-by-step service creation guide
+  - requirements.txt: Python dependencies template
+
+Updated:
+- minimal-sd-api/service.yaml: Added manifest for Service Nanny discovery
+- README.md: Updated with Service Nanny integration, template usage, port registry
+
+API Endpoints:
+- GET    /services              - List all discovered services
+- GET    /services/{name}       - Get service details
+- POST   /services/{name}/start - Start service (with GPU arbitration)
+- POST   /services/{name}/stop  - Stop service
+- GET    /services/{name}/status - Get running status + health
+- GET    /services/{name}/logs  - Get recent logs
+- POST   /rediscover           - Rescan for new services
+
+GPU Arbitration:
+- Only one service with gpu_required: true can run at a time
+- Returns 409 Conflict if attempting to start second GPU service
+- force: true flag automatically stops running GPU service first
+- CPU-only services can run concurrently without limits
+
+Service Manifest Schema:
+- name, description, version (required)
+- gpu_required, vram_gb (GPU configuration)
+- ports, health_endpoint, health_timeout (networking + monitoring)
+- tags, author, repository (metadata)
+- mcp{} (future MCP server configuration)
+
+Future Roadmap:
+- Phase 1: MCP server protocol implementation
+- Phase 2: Individual services as MCP servers
+- Phase 3: Service dependencies, auto-start/stop, metrics
+- Phase 4: Multi-host support, HA, authentication
+
+Testing:
+All features manually tested via test_api.sh script.
+Service discovery, lifecycle management, GPU arbitration, and health
+monitoring confirmed working as designed.
+
+Documentation:
+- 4 comprehensive README files
+- Complete API documentation
+- Architecture design docs
+- Quick reference guides
+- Template setup instructions
+- Port allocation registry
+
+This implementation provides a production-ready foundation for managing
+multiple AI services on a single GPU system, with a clear path to MCP
+integration and enterprise features.

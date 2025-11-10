@@ -21,7 +21,7 @@ GPU-accelerated Stable Diffusion 1.5 API with FastAPI on AMD RX 6700 XT.
 ### Start the Service
 
 ```bash
-cd /home/zack/ai-workspace/services/minimal-sd-api
+cd ~/ai-workspace/services/minimal-sd-api
 docker compose up -d
 
 # Check status

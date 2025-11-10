@@ -1,0 +1,56 @@
+services:
+  my-service:
+    # Choose appropriate base image
+    image: python:3.12-slim
+    # Or for GPU services:
+    # image: rocm/pytorch:rocm6.4.4_ubuntu24.04_py3.12_pytorch_release_2.7.1
+    
+    container_name: my-service
+    
+    # Uncomment for GPU access (AMD ROCm)
+    # devices:
+    #   - /dev/kfd:/dev/kfd
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "44"    # video group
+    #   - "109"   # render group
+    # ipc: host
+    # cap_add:
+    #   - SYS_PTRACE
+    # security_opt:
+    #   - seccomp:unconfined
+    
+    volumes:
+      # Mount current directory
+      - .:/workspace
+      # Add shared volumes if needed
+      # - ${AI_WORKSPACE:-~/ai-workspace}/Models:/workspace/Models
+      # - ${AI_WORKSPACE:-~/ai-workspace}/DockerVolumes/my-service:/workspace/data
+    
+    working_dir: /workspace
+    
+    environment:
+      # Basic Python settings
+      - PYTHONUNBUFFERED=1
+      
+      # Uncomment for GPU services (AMD ROCm)
+      # - HIP_PLATFORM=amd
+      # - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      # - PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:128
+      # - HIP_VISIBLE_DEVICES=0
+      # - CUDA_VISIBLE_DEVICES=0
+    
+    ports:
+      - "8001:8000"  # Change host port (8001) to avoid conflicts
+    
+    command: >
+      bash -c "
+        echo 'Installing dependencies...' &&
+        pip install --no-cache-dir fastapi uvicorn &&
+        echo 'Starting service...' &&
+        python3 app.py
+      "
+    
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

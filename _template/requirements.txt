@@ -1,0 +1,9 @@
+# Add any Python dependencies here
+fastapi
+uvicorn
+
+# For GPU/ML services, add:
+# torch
+# diffusers
+# transformers
+# accelerate

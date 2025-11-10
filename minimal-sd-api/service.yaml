@@ -1,0 +1,49 @@
+# Service Manifest for Service Nanny
+
+name: minimal-sd-api
+description: GPU-accelerated Stable Diffusion 1.5 API with FastAPI
+version: 1.0.0
+
+# GPU Requirements
+gpu_required: true
+vram_gb: 8  # Typical usage at 768×768
+
+# Docker Configuration
+compose_file: docker-compose.yml
+working_dir: .
+
+# Network Configuration
+ports:
+  - "8000:8000"
+
+# Health Check
+health_endpoint: http://localhost:8000/health
+health_timeout: 30
+
+# Service Metadata
+tags:
+  - image-generation
+  - stable-diffusion
+  - gpu
+  - ai
+  - inference
+author: Zack
+repository: https://github.com/Zmotive/rx6700-ai-services
+
+# Performance Info
+performance:
+  resolution: 768×768
+  steps: 10
+  generation_time: ~9s
+  hardware: AMD RX 6700 XT (12GB VRAM)
+
+# MCP Server Configuration (Future)
+mcp:
+  enabled: false
+  # Future: This service will become an MCP server
+  # tools:
+  #   - name: generate_image
+  #     description: Generate an image from a text prompt
+  # resources:
+  #   - name: generation_status
+  #     description: Current generation queue and status

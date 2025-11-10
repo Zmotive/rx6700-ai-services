@@ -1,0 +1,44 @@
+services:
+  service-nanny:
+    image: python:3.12-slim
+    container_name: service-nanny
+    
+    volumes:
+      # Mount service directory for service discovery
+      - ${AI_WORKSPACE:-~/ai-workspace}/services:${AI_WORKSPACE:-~/ai-workspace}/services:ro
+      # Mount Docker socket to control other containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount current directory for the app
+      - .:/workspace
+    
+    working_dir: /workspace
+    
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SERVICES_DIR=${AI_WORKSPACE:-~/ai-workspace}/services
+    
+    ports:
+      - "8080:8080"
+    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    command: >
+      bash -c "
+        echo '🔧 Service Nanny - AI Service Orchestrator' &&
+        echo '📦 Installing dependencies...' &&
+        pip install --no-cache-dir fastapi uvicorn pyyaml requests docker &&
+        apt-get update && apt-get install -y curl ca-certificates gnupg &&
+        install -m 0755 -d /etc/apt/keyrings &&
+        curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc &&
+        chmod a+r /etc/apt/keyrings/docker.asc &&
+        echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable\" > /etc/apt/sources.list.d/docker.list &&
+        apt-get update &&
+        apt-get install -y docker-ce-cli docker-compose-plugin &&
+        echo '🚀 Starting Service Nanny...' &&
+        python3 service_nanny.py
+      "
+    
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

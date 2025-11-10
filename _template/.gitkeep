@@ -1,0 +1,14 @@
+# Template Service
+
+**DO NOT USE THIS DIRECTLY** - This is a template for creating new services.
+
+See [SETUP.md](./SETUP.md) for instructions on how to use this template.
+
+## Quick Copy-Paste
+
+```bash
+cd /home/zack/ai-workspace/services
+cp -r _template my-new-service
+cd my-new-service
+# Follow SETUP.md instructions
+```

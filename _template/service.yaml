@@ -1,0 +1,40 @@
+# Service Manifest for Service Nanny
+# This file is required for service discovery and management
+
+name: my-service-name
+description: Brief description of what this service does
+version: 1.0.0
+
+# GPU Requirements
+gpu_required: false  # Set to true if this service needs GPU access
+vram_gb: 0           # Estimated VRAM usage in GB (if gpu_required: true)
+
+# Docker Configuration
+compose_file: docker-compose.yml
+working_dir: .  # Relative to this service directory
+
+# Network Configuration
+ports:
+  - "8001:8000"  # host:container - Change host port to avoid conflicts
+
+# Health Check
+health_endpoint: http://localhost:8001/health  # Must return 200 OK when healthy
+health_timeout: 30  # Seconds to wait for service to become healthy
+
+# Service Metadata
+tags:
+  - category1
+  - category2
+author: Your Name
+repository: https://github.com/user/repo
+
+# MCP Server Configuration (Optional - for future MCP server services)
+mcp:
+  enabled: false
+  # When enabled, service-nanny will expose this service as MCP tools
+  tools:
+    - name: example_tool
+      description: What this tool does
+  resources:
+    - name: example_resource
+      description: What this resource provides

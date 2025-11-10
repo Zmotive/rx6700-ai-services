@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   minimal-sd-api:
     image: rocm/pytorch:rocm6.4.4_ubuntu24.04_py3.12_pytorch_release_2.7.1
@@ -16,10 +14,10 @@ services:
     security_opt:
       - seccomp:unconfined
     volumes:
-      - /home/zack/ai-workspace/Projects:/workspace/Projects
-      - /home/zack/ai-workspace/Models:/workspace/Models
-      - /home/zack/ai-workspace/DockerVolumes/minimal-sd:/workspace/data
-    working_dir: /workspace
+      - .:/workspace/service
+      - ${AI_WORKSPACE:-/home/zack/ai-workspace}/Models:/workspace/Models
+      - ${AI_WORKSPACE:-/home/zack/ai-workspace}/DockerVolumes/minimal-sd:/workspace/data
+    working_dir: /workspace/service
     environment:
       - HIP_PLATFORM=amd
       - HSA_OVERRIDE_GFX_VERSION=10.3.0
@@ -55,7 +53,7 @@ services:
         echo 'Installing minimal dependencies...' &&
         pip install --no-cache-dir diffusers transformers accelerate safetensors pillow fastapi uvicorn &&
         echo 'Starting minimal Stable Diffusion API...' &&
-        python3 /workspace/Projects/minimal_sd_api.py
+        python3 minimal_sd_api.py
       "
     stdin_open: true
     tty: true
