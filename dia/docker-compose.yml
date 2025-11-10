@@ -1,0 +1,38 @@
+services:
+  dia:
+    image: rocm/pytorch:rocm6.4.4_ubuntu22.04_py3.10_pytorch_release_2.6.0
+    container_name: dia
+    hostname: dia
+    restart: unless-stopped
+    
+    ports:
+      - "8002:8002"
+    
+    volumes:
+      - ./:/workspace
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    
+    working_dir: /workspace
+    
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    
+    group_add:
+      - "44"    # video group
+      - "109"   # render group
+    
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - PYTORCH_ROCM_ARCH=gfx1031
+      - HIP_VISIBLE_DEVICES=0
+      - PYTHONUNBUFFERED=1
+    
+    command: bash start.sh
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
