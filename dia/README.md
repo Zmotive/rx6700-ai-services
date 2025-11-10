@@ -111,6 +111,52 @@ List all supported non-verbal sound effects.
 
 Check service health status.
 
+## Best Practices for Quality Audio
+
+### Text Length Guidelines
+
+- **Minimum**: ~5 seconds of audio (~430 tokens)
+  - Very short text produces unnatural-sounding audio
+  - Example: `[S1] Hi! [S2] Hello!` ❌ Too short
+  
+- **Optimal**: 5-20 seconds of audio
+  - Natural pacing and tone
+  - Example: `[S1] Hey! How has your day been? [S2] Pretty good! Just finished a big project. How about you?` ✓
+  
+- **Maximum**: ~20 seconds of audio (~1720 tokens)
+  - Longer text may cause unnaturally fast speech
+
+### Speaker Tag Rules
+
+1. **Always start with `[S1]`**
+   ```
+   [S1] Hello there!  ✓
+   [S2] Hello!        ❌ Don't start with S2
+   ```
+
+2. **Alternate speakers properly**
+   ```
+   [S1] ... [S2] ... [S1] ... [S2] ...  ✓
+   [S1] ... [S1] ... [S2] ...           ❌ Don't repeat same speaker
+   ```
+
+3. **End with a speaker tag** (auto-added by API if missing)
+   ```
+   [S1] Great to see you! [S2] You too! [S2]  ✓
+   ```
+   The ending tag improves audio quality at the end.
+
+### Sound Effects Usage
+
+- **Use sparingly** - 1-2 per speaker turn
+- **Use only documented tags** - see Non-Verbal Sound Effects table
+- **Place naturally** in the sentence
+  ```
+  [S1] That's hilarious! (laughs) [S2] I know! (chuckle)  ✓
+  [S1] (laughs) (coughs) (sighs) That's funny.           ❌ Too many
+  [S1] (fake_sound) This won't work.                     ❌ Undocumented tag
+  ```
+
 ## Usage Examples
 
 ### Basic Dialogue

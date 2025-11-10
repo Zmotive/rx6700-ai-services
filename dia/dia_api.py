@@ -78,7 +78,7 @@ class GenerateResponse(BaseModel):
     audio_base64: Optional[str] = None
     message: str
     duration_seconds: Optional[float] = None
-    sample_rate: int = 24000
+    sample_rate: int = 44100  # Dia's native sample rate
 
 class HealthResponse(BaseModel):
     status: str
@@ -167,8 +167,29 @@ async def generate_audio(request: GenerateRequest):
             detail="Text must include speaker tags [S1] and/or [S2]"
         )
     
+    # Preprocess text to improve generation quality
+    text = request.text.strip()
+    
+    # Dia generation guidelines:
+    # - Text should be moderate length (5-20s of audio, ~430-1720 tokens)
+    # - Always end with a speaker tag to improve quality at the end
+    # - Must start with [S1]
+    if not text.startswith("[S1]"):
+        logger.warning("Text doesn't start with [S1], this may cause issues")
+    
+    # Add ending speaker tag if missing (use the last speaker mentioned)
+    if not (text.endswith("[S1]") or text.endswith("[S2]")):
+        # Find last speaker tag
+        last_s1 = text.rfind("[S1]")
+        last_s2 = text.rfind("[S2]")
+        if last_s2 > last_s1:
+            text = text + " [S2]"
+        else:
+            text = text + " [S1]"
+        logger.info("Added ending speaker tag to improve audio quality")
+    
     try:
-        logger.info(f"Generating audio for: {request.text[:100]}...")
+        logger.info(f"Generating audio for: {text[:100]}...")
         
         # Set seed if provided
         if request.seed is not None:
@@ -178,7 +199,7 @@ async def generate_audio(request: GenerateRequest):
         
         # Generate audio
         output = model.generate(
-            request.text,
+            text,
             use_torch_compile=False,  # Disable for compatibility
             verbose=False,
             cfg_scale=request.cfg_scale,
@@ -187,8 +208,8 @@ async def generate_audio(request: GenerateRequest):
             cfg_filter_top_k=request.top_k,
         )
         
-        # Calculate duration
-        sample_rate = 24000  # Dia's sample rate
+        # Calculate duration - Dia uses 44100 Hz sample rate
+        sample_rate = 44100  # Dia's native sample rate (DEFAULT_SAMPLE_RATE)
         # Handle different output types
         if isinstance(output, (list, tuple)):
             audio_tensor = output[0] if len(output) > 0 else output
