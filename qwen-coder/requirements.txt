@@ -1,0 +1,2 @@
+# Python client dependencies for Qwen-Coder service
+requests

@@ -1,0 +1,45 @@
+# Service Manifest for Service Nanny
+# This file is required for service discovery and management
+
+name: qwen-coder
+description: Qwen2.5-Coder-7B-Instruct - Code-specialized LLM with Ollama backend
+version: 1.0.0
+
+# GPU Requirements
+gpu_required: true
+vram_gb: 9  # Model uses ~8-9GB VRAM
+
+# Docker Configuration
+compose_file: docker-compose.yml
+working_dir: .  # Relative to this service directory
+
+# Network Configuration
+ports:
+  - "8001:11434"  # host:container - Ollama serves on 11434
+
+# Health Check
+health_endpoint: http://localhost:8001/  # Ollama root endpoint for health check
+health_timeout: 60  # Seconds to wait for service to become healthy
+
+# Service Metadata
+tags:
+  - llm
+  - coding
+  - inference
+  - ollama
+  - qwen
+  - openai-compatible
+author: Service Nanny
+repository: https://github.com/Zmotive/rx6700-ai-services
+
+
+# MCP Server Configuration (Optional - for future MCP server services)
+mcp:
+  enabled: false
+  # When enabled, service-nanny will expose this service as MCP tools
+  tools:
+    - name: example_tool
+      description: What this tool does
+  resources:
+    - name: example_resource
+      description: What this resource provides
