@@ -1,8 +1,25 @@
 name: dia
 description: Dia 1.6B - Text-to-dialogue with voice control and non-verbal sounds
 version: 1.6B-0626
+
+# GPU Requirements
+gpu_required: true
+vram_gb: 5  # Model uses ~4.4GB VRAM, 5GB safe allocation
+
+# Docker Configuration
+compose_file: docker-compose.yml
+working_dir: .
+
+# Network Configuration
 port: 8002
-health_endpoint: /health
+ports:
+  - "8002:8002"
+
+# Health Check
+health_endpoint: http://localhost:8002/health
+health_timeout: 60
+
+# Service Metadata
 tags:
   - tts
   - text-to-speech
@@ -12,13 +29,11 @@ tags:
   - audio-generation
   - pytorch
   - rocm
+
+# Model Information (metadata only)
 model:
   name: nari-labs/Dia-1.6B-0626
   parameters: 1.6B
   vram_usage: ~4.4GB (FP16/BF16)
   license: Apache 2.0
-hardware:
-  gpu_required: true
-  min_vram: 6GB
-  recommended_vram: 8GB
   tested_on: AMD RX 6700 XT (12GB)
