@@ -239,8 +239,8 @@ async def get_service_status(service_name: str):
     )
 
 @app.post("/services/{service_name}/start")
-async def start_service(service_name: str, request: StartServiceRequest = StartServiceRequest()):
-    """Start a service"""
+async def start_service(service_name: str, request: StartServiceRequest = StartServiceRequest(force=True)):
+    """Start a service (automatically stops conflicting GPU services by default)"""
     global gpu_service_running, running_services
     
     if service_name not in services_registry:
@@ -254,18 +254,26 @@ async def start_service(service_name: str, request: StartServiceRequest = StartS
     if get_docker_compose_status(service_path):
         return {"message": f"Service '{service_name}' is already running", "status": "running"}
     
-    # GPU arbitration
+    # GPU arbitration - automatically detect and stop running GPU services
     if manifest.get("gpu_required", False):
-        if gpu_service_running and gpu_service_running != service_name:
+        # Check if any GPU services are currently running (not just tracked ones)
+        running_gpu_services = []
+        for svc_name, svc_entry in services_registry.items():
+            if svc_name != service_name and svc_entry["manifest"].get("gpu_required", False):
+                if get_docker_compose_status(svc_entry["path"]):
+                    running_gpu_services.append(svc_name)
+        
+        if running_gpu_services:
             if not request.force:
                 raise HTTPException(
                     status_code=409,
-                    detail=f"GPU service '{gpu_service_running}' is already running. Use force=true to stop it first."
+                    detail=f"GPU service(s) {running_gpu_services} already running. Use force=true to stop them first."
                 )
             else:
-                # Stop the running GPU service
-                print(f"🛑 Forcing stop of {gpu_service_running}")
-                await stop_service(gpu_service_running)
+                # Stop all running GPU services
+                for svc_name in running_gpu_services:
+                    print(f"🛑 Auto-stopping GPU service: {svc_name}")
+                    await stop_service(svc_name)
     
     # Start the service
     print(f"🚀 Starting {service_name}...")

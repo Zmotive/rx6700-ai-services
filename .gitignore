@@ -1,0 +1,51 @@
+# Docker volumes and generated data
+# These directories may be created by services but should not be committed
+
+# ComfyUI service data directories
+comfyui/comfyui/
+comfyui/models/
+comfyui/output/
+comfyui/custom_nodes/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
+
+# Model files (large binary files)
+*.safetensors
+*.ckpt
+*.pth
+*.bin
+*.pt
+
+# Audio/video output files
+*.mp3
+*.wav
+*.mp4
+*.avi
+
+# Backup files
+*.bak
+*.backup

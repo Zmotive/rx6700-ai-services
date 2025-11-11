@@ -1,0 +1,52 @@
+# Service Manifest for Service Nanny
+
+name: comfyui
+description: ComfyUI - Visual workflow-based Stable Diffusion with node graph interface
+version: latest
+
+# GPU Requirements
+gpu_required: true
+vram_gb: 10  # Typical SD 1.5/SDXL usage (can vary by workflow)
+
+# Docker Configuration
+compose_file: docker-compose.yml
+working_dir: .
+
+# Network Configuration
+ports:
+  - "8188:8188"  # ComfyUI web interface and API
+
+# Health Check
+health_endpoint: http://localhost:8188/system_stats
+health_timeout: 90  # ComfyUI can take time to start
+
+# Service Metadata
+tags:
+  - image-generation
+  - stable-diffusion
+  - workflow
+  - visual-programming
+  - comfyui
+  - sdxl
+  - controlnet
+  - upscaling
+  - pytorch
+  - rocm
+
+# Model Information (metadata only)
+features:
+  - Visual node-based workflow builder
+  - Full Stable Diffusion 1.5, 2.x, SDXL support
+  - ControlNet, IPAdapter, AnimateDiff support
+  - Custom nodes ecosystem
+  - Workflow import/export (JSON)
+  - REST API for automation
+  - Image upscaling and enhancement
+  - LoRA and embedding support
+  - Real-time preview
+  
+endpoints:
+  web_ui: "http://localhost:8188"
+  api_docs: "http://localhost:8188/object_info"
+  queue: "http://localhost:8188/queue"
+  prompt: "http://localhost:8188/prompt"
